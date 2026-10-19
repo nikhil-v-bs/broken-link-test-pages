@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bot-Protection (WAF) Links</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bot-Protection (WAF) Links</h1>
+        <p class="text-muted">Links to sites behind Cloudflare or Imperva. "Signals" lists what the site sends. "Before" is what the worker reports today; "After" is the result expected once central-scanner-worker PR #1037 is deployed. Results can vary by scanner IP. Checked on 2026-10-19.</p>
+
+        <h3>1. Working pages that only carry a vendor cookie or header</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Signals</th><th>Before</th><th>After</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://www.fca.org.uk/">Financial Conduct Authority</a></td><td>200, real page</td><td>Cloudflare <code>__cf_bm</code> cookie</td><td>Access restricted 200</td><td>Passed</td></tr>
+                <tr><td><a href="https://karat.com/about/">Karat: About Us</a></td><td>200, real page</td><td>Cloudflare <code>__cf_bm</code> cookie</td><td>Access restricted 200</td><td>Passed</td></tr>
+                <tr><td><a href="https://brokercheck.finra.org/">FINRA BrokerCheck</a></td><td>200, real page</td><td>Cloudflare <code>__cf_bm</code> cookie</td><td>Access restricted 200</td><td>Passed</td></tr>
+                <tr><td><a href="https://www.asx.com.au/">Australian Securities Exchange</a></td><td>200, real page</td><td>Imperva <code>x-iinfo</code>, <code>x-cdn</code>, <code>incap_ses</code>, <code>visid_incap</code></td><td>Access restricted 200</td><td>Passed</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2. Real 404s on protected sites</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Signals</th><th>Before</th><th>After</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://karat.com/this-page-does-not-exist-a11y/">Karat: missing page</a></td><td>404</td><td>Cloudflare <code>__cf_bm</code> cookie</td><td>Access restricted 404 (broken link hidden)</td><td>Broken 404</td></tr>
+                <tr><td><a href="https://www.asx.com.au/this-page-does-not-exist-a11y">ASX: missing page</a></td><td>404</td><td>Imperva headers and cookies</td><td>Access restricted 404 (broken link hidden)</td><td>Broken 404</td></tr>
+            </tbody>
+        </table>
+
+        <h3>3. Real bot challenges (should not change)</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Signals</th><th>Before</th><th>After</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://www.ciro.ca/">CIRO</a></td><td>403 to scanners, 200 to a normal browser</td><td><code>cf-mitigated: challenge</code>, "Just a moment..." page</td><td>Access restricted 403</td><td>Access restricted 403</td></tr>
+                <tr><td><a href="https://www.tipranks.com/">TipRanks</a></td><td>403 to scanners</td><td><code>cf-mitigated: challenge</code>, "Just a moment..." page</td><td>Access restricted 403</td><td>Access restricted 403</td></tr>
+                <tr><td><a href="https://www.streetinsider.com/">StreetInsider</a></td><td>403 to scanners</td><td><code>cf-mitigated: challenge</code>, "Just a moment..." page</td><td>Access restricted 403</td><td>Access restricted 403</td></tr>
+            </tbody>
+        </table>
+
+        <h3>4. Known trade-off: challenge served as 200</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Signals</th><th>Before</th><th>After</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://www.zacks.com/">Zacks</a></td><td>200; headless Chrome can get Imperva's "Pardon Our Interruption" page</td><td>Imperva headers and cookies; challenge text only in the tab check's body</td><td>Access restricted 200</td><td>Passed when only the fetch check runs (accepted trade-off)</td></tr>
+            </tbody>
+        </table>
+
+        <h3>5. Controls (no bot protection)</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Signals</th><th>Before</th><th>After</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://httpbin.org/status/200">200 OK</a></td><td>200</td><td>None</td><td>Passed</td><td>Passed</td></tr>
+                <tr><td><a href="https://httpbin.org/status/403">403 Forbidden</a></td><td>403</td><td>None</td><td>Access restricted 403</td><td>Access restricted 403</td></tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

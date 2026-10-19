@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Access Restricted Links (401 / 403 / 429 / 451)</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Access Restricted Links</h1>
+        <p class="text-muted">Every link and image below returns a fixed status from httpbin.org. The "Expected" column is what the broken-link scan should report for it.</p>
+
+        <h3>1. Access restricted (direct)</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Expected</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://httpbin.org/status/401">401 Unauthorized</a></td><td>401</td><td>Access restricted, not broken</td></tr>
+                <tr><td><a href="https://httpbin.org/basic-auth/user/passwd">401 Basic auth prompt</a></td><td>401 (WWW-Authenticate: Basic)</td><td>Access restricted, not broken</td></tr>
+                <tr><td><a href="https://httpbin.org/bearer">401 Bearer token required</a></td><td>401</td><td>Access restricted, not broken</td></tr>
+                <tr><td><a href="https://httpbin.org/status/403">403 Forbidden</a></td><td>403</td><td>Access restricted, not broken</td></tr>
+                <tr><td><a href="https://httpbin.org/status/429">429 Too Many Requests</a></td><td>429</td><td>Access restricted, not broken</td></tr>
+                <tr><td><a href="https://httpbin.org/status/451">451 Unavailable For Legal Reasons</a></td><td>451</td><td>Access restricted, not broken</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2. Access restricted after a redirect</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Expected</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fstatus%2F401&amp;status_code=302">302 then 401</a></td><td>302 &rarr; 401</td><td>Access restricted (redirect followed)</td></tr>
+                <tr><td><a href="https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fstatus%2F403&amp;status_code=301">301 then 403</a></td><td>301 &rarr; 403</td><td>Access restricted (redirect followed)</td></tr>
+            </tbody>
+        </table>
+
+        <h3>3. Working links (controls)</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Expected</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://httpbin.org/status/200">200 OK</a></td><td>200</td><td>Passed</td></tr>
+                <tr><td><a href="https://httpbin.org/status/301">301 then 200</a></td><td>301 &rarr; 200</td><td>Passed</td></tr>
+            </tbody>
+        </table>
+
+        <h3>4. Broken links (controls)</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Expected</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://httpbin.org/status/404">404 Not Found</a></td><td>404</td><td>Broken</td></tr>
+                <tr><td><a href="https://httpbin.org/status/500">500 Internal Server Error</a></td><td>500</td><td>Broken</td></tr>
+                <tr><td><a href="https://does-not-exist.invalid/">Domain does not exist</a></td><td>DNS failure, no response</td><td>Broken</td></tr>
+            </tbody>
+        </table>
+
+        <h3>5. Slow but working</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Link</th><th>Returns</th><th>Expected</th></tr></thead>
+            <tbody>
+                <tr><td><a href="https://httpbin.org/delay/10">Responds after about 11 seconds</a></td><td>200 after ~11 s</td><td>Works for a user; slower than the scanner's 10 s per-check timeout</td></tr>
+            </tbody>
+        </table>
+
+        <h3>6. Images (resource checks)</h3>
+        <table class="table table-bordered">
+            <thead><tr><th>Image</th><th>Returns</th><th>Expected</th></tr></thead>
+            <tbody>
+                <tr><td><img src="https://httpbin.org/image/png" alt="Working image" width="40" height="40"></td><td>200</td><td>Passed</td></tr>
+                <tr><td><img src="https://httpbin.org/status/401?file=pic.jpg" alt="401 image" width="40" height="40"></td><td>401</td><td>Access restricted, not a resource error</td></tr>
+                <tr><td><img src="https://httpbin.org/status/403?file=pic.jpg" alt="403 image" width="40" height="40"></td><td>403</td><td>Access restricted, not a resource error</td></tr>
+                <tr><td><img src="https://httpbin.org/status/404?file=pic.jpg" alt="404 image" width="40" height="40"></td><td>404</td><td>Resource error</td></tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
